@@ -25,22 +25,25 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
-        return http.build();
-    }
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/test/public").permitAll()  // ← ADD THIS LINE
+            .requestMatchers("/api/test/check-auth").permitAll()
+            .requestMatchers("/actuator/**").permitAll()  // ← Allow all actuator endpoints
+            .requestMatchers("/error").permitAll()        // ← Allow error page
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    
+    return http.build();
+}
     
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) 
